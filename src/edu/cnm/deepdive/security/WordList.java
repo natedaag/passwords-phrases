@@ -9,10 +9,18 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.Random;
 
+/**
+ * Program to create a diceware passphrase, using integer input from user and making 
+ * passphrase to that length of words.
+ *  
+ *  * @author natedaag
+ */
 public class WordList {
 
+	/** The default value used for the phrase length, if none is specified. */
 	public static final int RECOMMENDED_PHRASE_LENGTH = 5;
 
+	/** The list of words from which the pass phrases will be created. */
 	public static final String WORD_LIST_FILE = "resources/eff_large_wordlist.txt";
 
 	private static final String PROPERTIES_FILE = "resources/text.properties";
@@ -21,6 +29,14 @@ public class WordList {
 	private static String errorMessage = "";
 	private static String warningMessage = "";
 
+	/**
+	 * Read and emit a subset of words from the world list file.  The numger of
+	 * words selected is specified on the comand line; if no arguments are
+	 * passed, use {@link #RECOMMENDED_PHRASE_LENGTH RECOMMENDED_PHRASE_LENGTH}.
+	 * 
+	 * @param args Command line arguments. <code>args[0]</code>, if present, is 
+	 * 				treated phrase length
+	 */
 	public static void main(String[] args) {
 		try {
 			loadResources();
@@ -58,7 +74,14 @@ public class WordList {
 			warningMessage = properties.getProperty("warning.message");
 		}
 	}
-
+/**
+ * Read word list file and return an array of words.  The dice numbers for
+ * the words are not included in the return value.
+ * 
+ * @param listPath          classpath-relative path to word list file
+ * @return Returns          contents of world list (not including dice number). 
+ * @throws IOException      Error in finding or reading word list file.
+ */
 	public static String[] getWordList(String listPath) throws IOException {
 		try (BufferedReader reader = new BufferedReader(
 				new InputStreamReader(WordList.class.getClassLoader().getResourceAsStream(listPath)))) {
@@ -70,6 +93,13 @@ public class WordList {
 		}
 	}
 
+	/** 
+	 * Randomly select and return a subset of the word list.
+	 * 
+	 * @param numWords 	Number of words to select.
+	 * @param wordList	Pool of worlds. Takes number input by user, to choose how many words for passphrase.
+	 * @return Returns	Selected words.
+	 */
 	public static String[] getRandomWords(int numWords, String[] wordList) {
 		String[] selection = new String [numWords];
 		Random rng = new Random();
@@ -79,6 +109,7 @@ public class WordList {
 		}
 		return selection;
 		}	
+	
 	private static String getJoinedString(String[] source) {
 		StringBuilder builder = new StringBuilder();
 		for (String item : source) {
