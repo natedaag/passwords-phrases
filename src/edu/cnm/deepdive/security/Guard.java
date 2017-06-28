@@ -5,12 +5,6 @@ package edu.cnm.deepdive.security;
 
 import java.util.HashMap;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-
 /**
  * Program to generate random passwords and passphrases.
  * 
@@ -30,72 +24,12 @@ public class Guard {
 	 *            Command line arguments specifying generation options.
 	 */
 	public static void main(String[] args) {
-		HashMap<String, Object> map = getOptions(args);
+		HashMap<String, Object> map = Options.getOptions(args);
  		String artifact = generateArtifact(map);
 		emitArtifact(artifact);
 	} // end main method
 
-	static HashMap<String, Object> getOptions(String[] args) {
-		try {		Option excludeUpperOption = Option.builder("b").longOpt("exclue-upper")
-																	.hasArg(false)
-																	.build();
-					Option excludeLowerOption = Option.builder("s").longOpt("exclude-lower")
-																   .hasArg(false)
-																   .build();
-					Option excludeDigits = Option.builder("n").longOpt("exclude-digits")
-															  .hasArg(false)
-															  .build();
-					Option excludePunctuation = Option.builder("p").longOpt("exclude-punctuation")
-																   .hasArg(false)
-																   .build();
-					Option includeAmbiguous	= Option.builder("a").longOpt("include-ambiguous")
-																 .hasArg(false)
-																 .build();
-			Option lengthOption = Option.builder("L").argName("length")
-								 				   			 .hasArg()
-								 							 .longOpt("length")
-								 							 .numberOfArgs(1)
-								 							 .type(Number.class)
-								 							 .build();
-		Option delimiterOption = Option.builder("d").argName("delimiter")
-												   .hasArg()
-												   .longOpt("delimiter")
-												   .numberOfArgs(1)
-												   .optionalArg(true)
-												   .type(String.class)
-												   .build();
-		Option wordListOption = Option.builder("w").argName("path-to-list-field")
-												   .hasArg()
-												   .longOpt("word-list")
-												   .numberOfArgs(1)
-												   .type(String.class)
-												   .build();
-		Option modeOption = Option.builder("m").hasArg(false)											   .hasArg()
-											   .longOpt("password-mode")
-											   .build();
-		Options opts = new Options().addOption(lengthOption)
-									.addOption(delimiterOption)
-									.addOption(wordListOption)
-									.addOption(excludeUpperOption)
-									.addOption(excludeLowerOption)
-									.addOption(excludeDigits)
-									.addOption(excludePunctuation)
-									.addOption(includeAmbiguous)
-									.addOption(modeOption);
-		DefaultParser parser = new DefaultParser();
-		HashMap<String, Object> map = new HashMap<>();
-		CommandLine cmdLine = parser.parse(opts, args);
-		for (Option option : cmdLine.getOptions()) {
-			String opt = option.getOpt();
-		map.put(opt, cmdLine.getParsedOptionValue(opt));
-		}
-		return map;
-		} catch (ParseException ex) { 
-			// TODO handle this exception with a usage display			
-			return null;
-					}
-		
-	} // end getOptions
+
 
 	static String generateArtifact(HashMap<String, Object> map) {
 		if (map.containsKey("m")) {
