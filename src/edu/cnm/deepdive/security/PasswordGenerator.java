@@ -21,6 +21,8 @@ public class PasswordGenerator {
 	 * Punctuation characters that may optionally be included in the password.
 	 */
 	public static final String PUNCTUATION = "!@#$%&*,.";
+	public static final int DEFAULT_PASSWORD_LENGTH = 12;
+		
 	/**
 	 * Ambiguous character that may optionally be excluded from the password.
 	 */
@@ -28,12 +30,13 @@ public class PasswordGenerator {
 	private static final String UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	private static final String LOWERCASE = UPPERCASE.toLowerCase();
 	private static final String NUMBERS = "0123456789";
+	
 	/** Generates random number to pick password. */
 	
 	private Random rng = null;
 	private char[] pool = null;
-	private int minLength = 6;
-	private int maxLength = 12;
+	private int minLength = DEFAULT_PASSWORD_LENGTH;
+	private int maxLength = DEFAULT_PASSWORD_LENGTH;
 	private boolean upperCaseIncluded = true;
 	private boolean lowerCaseIncluded = true;
 	private boolean numbersIncluded = true;

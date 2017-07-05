@@ -3,6 +3,7 @@
  */
 package edu.cnm.deepdive.security;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -25,14 +26,24 @@ import org.apache.commons.cli.UnrecognizedOptionException;
 // TODO need to set messages for inappropriate values
 public class Options {
   
+  public static final int MAXIMUM_RECOMMENDED_PASSPHRASE_LENGTH = 10;
+  public static final int MINIMUM_RECOMMENDED_PASSPHARASE_LENGTH = 6;
+  public static final int MAXIMUM_RECOMMENDED_PASSWORD_LENGTH = 16;
+  public static final int MINIMUM_RECOMMENDED_PASSWORD_LENGTH = 8;
+
   public static final String JAR_FILE_NAME = "guard.jar";
   
-  private static final String INVALID_DELIMITERS = "[<>&|*?^]";
+  private static final String INVALID_DELIMITERS_REGEX = "^.*[<>&|*?^]+.*$";
   private static final String PASSWORD_EXTREME_LENGTH_WARNING = "pw.warning.extremelength.message";
   private static final String PASSPHRASE_EXTREME_LENGTH_WARNING = "pp.warning.extremelength.message";
   private static final String PASSPHRASE_LENGTH_WARNING = "pp.warning.length.message";
   private static final String PASSWORD_LENGTH_WARNING = "pw.warning.length.message";
-  private static final String OPTIONS_CONFLICT_WARNING = "opts.conflict.warning.message";
+  
+  private static final String PASSPHRASE_OPTIONS_CONFLICT_WARNING = "pp.opts.conflict.warning.message";
+  private static final String PASSWORD_OPTIONS_CONFLICT_WARNING = "pw.opts.conflict.warning.message";
+  
+  private static final String AMBIGUOUS_CHARACTER_WARNING = "pw.warning.ambiguous.message";
+  
   private static final String LENGTH_ERROR = "error.length.message";
   private static final String RESERVED_CHARACTER_ERROR = "pp.error.reserved.message";
 
@@ -45,6 +56,8 @@ public class Options {
   private static final String BAD_OPTION_KEY = "error.missingargument.message";
   private static final String BAD_ARGUMENT_KEY = "error.badargument.message";
   
+  private static final String WORD_LIST_ERROR = "pp.error.list.message";
+  
   private static final String HELP_OPTION_KEY = "help.option";
   private static final String LENGTH_OPTION_KEY = "length.option";
   private static final String DELIMITER_OPTION_KEY = "delimiter.option";
@@ -55,21 +68,18 @@ public class Options {
   private static final String DIGITS_OPTION_KEY = "exclude-digits.option";
   private static final String PUNCTUATION_OPTION_KEY = "exclude-punctuation.option";
   private static final String AMBIGUOUS_OPTION_KEY = "include-ambiguous.option";
-  private static String usageMessage = "java -jar %s [options]";
 
-  // TODO catch thrown exceptions - invalid arguments
-  // TODO warnings - see messages.properties & options.properties
+  private static String usageMessage = String.format("java -jar %s [options]", JAR_FILE_NAME);
+
   static HashMap<String, Object> getOptions(String[] args) {
     ResourceBundle messageBundle = null;
-    org.apache.commons.cli.Options opts = null;
-        
     try {
       messageBundle = ResourceBundle.getBundle(MESSAGES_BUNDLE);
     } catch (MissingResourceException ex) {
      System.out.println(FATAL_MESSAGE);
      return null;
     }    
-    
+    org.apache.commons.cli.Options opts = null;
     try {
       opts = buildOptions();
       
@@ -77,24 +87,7 @@ public class Options {
       if (map!= null) {
         validateCommandLine(map, messageBundle);
       }
-//      int length = ((Number) map.get("L")).intValue();
-//      if (cmdLine.hasOption("m")) {
-//        if (length < 5) { // Password
-//          System.out.println(messageBundle.getString(PASSWORD_LENGTH_WARNING));
-//        }
-//        if (length > 16) {
-//          System.out.println(messageBundle.getString(PASSWORD_EXTREME_LENGTH_WARNING));
-//        } else { // passphrase
-//          if (length < 5) {
-//            System.out.println("pp.warning.length.message");
-//          }
-//          if (length > 10) {
-//            System.out.println("pp.warning.extremelength.message");
-//          }
-//          
-//        }
-//        
-//      }
+      
       return map;
       } catch(MissingArgumentException ex) {  
         Option missing = ex.getOption();
@@ -108,38 +101,47 @@ public class Options {
       } catch (ParseException ex) {
         displayError(messageBundle, BAD_ARGUMENT_KEY, opts, ex.getLocalizedMessage());
       return null;
-    } catch (MissingResourceException ex) {
+    }  catch (NegativeArraySizeException ex) {
+      displayError(messageBundle, LENGTH_ERROR, opts, null);
+      return null;
+    }catch (MissingResourceException ex) {
       displayError(messageBundle, MISSING_OPTIONS_BUNDLE_KEY, opts, OPTIONS_DESCRIPTION_BUNDLE);
       return null;
     } catch (IllegalArgumentException ex) {
-      displayError(messageBundle, LENGTH_ERROR, opts, null);
+      displayError(messageBundle, RESERVED_CHARACTER_ERROR, opts, null);
+      return null;
+    } catch (FileNotFoundException ex) {
+      displayError(messageBundle, WORD_LIST_ERROR, opts, ex.getMessage());
       return null;
     }
   } // end getOptions
   
-  private static void validateCommandLine(HashMap<String, Object> map, ResourceBundle messageBundle) {
+  private static void validateCommandLine(HashMap<String, Object> map, ResourceBundle messageBundle) 
+      throws FileNotFoundException, IllegalArgumentException, NegativeArraySizeException {
     if (map.containsKey("m")) {
       for (Map.Entry<String, Object> entry : map.entrySet()) {
         switch (entry.getKey()) {
           case "L":
             int length = ((Number) entry.getValue()).intValue();
-            if (length < 0) {
+            if (length <= 0) {
               throw new NegativeArraySizeException(); 
+            }
+            if (length < MINIMUM_RECOMMENDED_PASSWORD_LENGTH) {
+              System.out.printf(messageBundle.getString(PASSWORD_LENGTH_WARNING), MINIMUM_RECOMMENDED_PASSWORD_LENGTH);
+            } else if (length > MAXIMUM_RECOMMENDED_PASSWORD_LENGTH) {
+              System.out.printf(messageBundle.getString(PASSWORD_EXTREME_LENGTH_WARNING), MAXIMUM_RECOMMENDED_PASSWORD_LENGTH);
             }
             break;
           case "a":
-            // TODO Warn about ambiguoous charaters in passwords.
+            System.out.printf(messageBundle.getString(AMBIGUOUS_CHARACTER_WARNING));
             break;
           case "d":
           case "w":
-            // TODO these are conflicting options with password mode.
+          System.out.printf(messageBundle.getString(PASSWORD_OPTIONS_CONFLICT_WARNING));
             break;
-          case "b":
-          case "s":
-          case "n":
-          case "p":
           default:
               // do nothing
+            break;
         }
       }
     } else {
@@ -150,23 +152,28 @@ public class Options {
             if (length < 0) {
               throw new NegativeArraySizeException(); 
             }
+            if (length < MINIMUM_RECOMMENDED_PASSPHARASE_LENGTH) {
+              System.out.printf(messageBundle.getString(PASSPHRASE_LENGTH_WARNING), MINIMUM_RECOMMENDED_PASSPHARASE_LENGTH);
+            } else if (length > MAXIMUM_RECOMMENDED_PASSPHRASE_LENGTH) {
+              System.out.printf(messageBundle.getString(PASSPHRASE_EXTREME_LENGTH_WARNING), MAXIMUM_RECOMMENDED_PASSPHRASE_LENGTH);
+            }
             break;
           case "d":
             String delimiter = (String) entry.getValue();
-            if (delimiter.matches(INVALID_DELIMITERS)) {
+            if (delimiter.matches(INVALID_DELIMITERS_REGEX)) {
               throw new IllegalArgumentException();
             }
             break;
           case "w":
-            // TODO Verify that word list file exists.
+            String wordListFile = (String) entry.getValue();
+            try {
+              ResourceBundle.getBundle(wordListFile);
+            } catch (MissingResourceException ex) {
+              throw new FileNotFoundException(wordListFile);
+            }
             break;
-          case "b":
-          case "s":
-          case "n":
-          case "p":
-          case "a":
-            default:
-            // These are conflicting options with passphrase mode.
+          default:
+            System.out.printf(messageBundle.getString(PASSPHRASE_OPTIONS_CONFLICT_WARNING));                
             break;
         }
       }
@@ -240,7 +247,6 @@ public class Options {
                            .desc(bundle.getString(LIST_OPTION_KEY))
                            .build();
     Option modeOption = Option.builder("m").hasArg(false)
-                                           .hasArg()
                                            .longOpt("password-mode")
                                            .desc(bundle.getString(MODE_OPTION_KEY))
                                            .build();
