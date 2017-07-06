@@ -28,7 +28,7 @@ public class PassphraseGenerator {
   
   
   /**
-   * Instantiates a new passphrase generator with default field values
+   * Instantiates a new passphrase generator with default field values.
    */
   public PassphraseGenerator() {
     super();
@@ -36,7 +36,7 @@ public class PassphraseGenerator {
   }
 
   /**
-   * 
+   *    Creates pool of words from which the passphrase will be selected.
    */
   protected void setupPool() {
     ResourceBundle bundle = ResourceBundle.getBundle(wordList);
@@ -50,15 +50,15 @@ public class PassphraseGenerator {
   }
   
  /**
-  * 
+  *     Generates random number that will link to words in the pool of words.
   */
   protected void setupRng() {
     rng = new SecureRandom();
   }
   
   /**
-   * 
-   * @return
+   *    Generates random passphrase, consisting of specified number of words.
+   * @return    returns the string, which is the passphrase.
    */
   public String generate() {
     if (pool == null) {
@@ -68,41 +68,43 @@ public class PassphraseGenerator {
       setupRng();
     }
     StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < length; i++) {
-      String word = pool.get(rng.nextInt(pool.size()));
-      builder.append(word);
+    String word = pool.get(rng.nextInt(pool.size()));
+    builder.append(word);
+    for (int i = 0; i < length - 1; i++) {
+      word = pool.get(rng.nextInt(pool.size()));
       builder.append(delimiter);
+      builder.append(word);
     }
     return builder.toString().trim();
   }
   
   /**
-   * 
-   * @return
+   *    Gets the list of words, from which a specified number will make the passphrase.
+   * @return    The wordList that contains the word.
    */
   public String getWordList() {
     return wordList;
   }
   
-  /**
-   * 
-   * @param wordList
+  /**   
+   *    Determines which wordList will be used.  
+   * @param wordList    Default is English language, non-offensive words.
    */
   public void setWordList(String wordList) {
     this.wordList = wordList;
   }
   
   /**
-   * 
-   * @return
+   *    Gets the punctuation character that will be used between words, to mark the ends of the words.
+   * @return    Default is the space. (" ").
    */
   public String getDelimiter() {
     return delimiter;
   }
   
   /**
-   * 
-   * @param delimiter
+   *    User sets this delimiter.
+   * @param delimiter   Default is a space key. (" ")
    */
   public void setDelimiter(String delimiter) {
     this.delimiter = delimiter;
@@ -110,29 +112,31 @@ public class PassphraseGenerator {
   
   
   /**
-   * 
-   * @return
+   *    Gets the number of words that will go into the password.  
+   * @return    Default is 5 words.
    */
   public int getLength() {
     return length;
   }
   
   /**
-   * 
-   * @param length
+   *    Sets the length, in words, of how long the password will be.
+   * @param length  Default is 5.
    */
   public void setLength(int length) {
     this.length = length;
   }
 
   /**
-   * @return the rng
+   * Gets the random number generator, which will select the numbers that are associated with the words in wordList.
+   * @return the rng    Random numbers will be associated with words.
    */
   protected Random getRng() {
     return rng;
   }
 
   /**
+   *    Sets the random number generator, which will select the numbers that are associated with words in wordList.
    * @param rng the rng to set
    */
   protected void setRng(Random rng) {

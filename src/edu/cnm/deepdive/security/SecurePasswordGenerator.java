@@ -19,6 +19,9 @@ public class SecurePasswordGenerator extends PasswordGenerator {
 
 	}
 	
+	/**
+	 *     Uses secure random number generator, rather than the unsecure rng in super class.
+	 */
 	@Override
 	protected void setupRng() {
 		try {
