@@ -3,6 +3,11 @@
 	-fx-font-weight: bold;
 }
 
+.tab-pane .tab-header-background {
+	-fx-background-color: -fx-outer-border, -fx-inner-border, derive(-fx-color, 0%);
+	-fx-effect: innershadow(two-pass-box , rgba(0, 0, 0, 0.6) , 4, 0.0 , 0 , 0);
+}
+
 StackPane VBox {
 	-fx-background-color: white;
 }

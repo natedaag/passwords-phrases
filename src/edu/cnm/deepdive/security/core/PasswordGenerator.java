@@ -2,7 +2,7 @@
  * PasswordGenerator.java
  */
 
-package edu.cnm.deepdive.security;
+package edu.cnm.deepdive.security.core;
 
 import java.util.Random;
 
@@ -66,7 +66,7 @@ public class PasswordGenerator {
 	 * 
 	 * @param maxLength		the maximum length to set
 	 */
-	protected void setMaxLength(int maxLength) {
+	public void setMaxLength(int maxLength) {
 		this.maxLength = maxLength;
 	}
 
@@ -84,12 +84,12 @@ public class PasswordGenerator {
 	 * 
 	 * @param minLength		minimum password length.
 	 */
-	protected void setMinLength(int minLength) {
+	public void setMinLength(int minLength) {
 		this.minLength = minLength;
 	}
 
 	private void setupPool() {
-		if (pool == null) {
+
 			StringBuilder builder = new StringBuilder();
 			if (isLowerCaseIncluded()) {
 				builder.append(LOWERCASE);
@@ -109,7 +109,7 @@ public class PasswordGenerator {
 			}
 			pool = work.toCharArray();
 		}
-	}
+
 	/**
 	 *     Sets up the random number generator, which is associated with the words in wordList.
 	 */
