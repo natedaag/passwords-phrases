@@ -82,7 +82,7 @@ public class PasswordGenerator {
 	/**
 	 * Sets the minimum password length.
 	 * 
-	 * @param minLength		minimum password length.
+	 * @param minLength	minimum password length.
 	 */
 	public void setMinLength(int minLength) {
 		this.minLength = minLength;
